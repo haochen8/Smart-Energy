@@ -1,0 +1,23 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: kalmar-app-config
+  namespace: kalmar-digital-twin
+  labels:
+    project: kalmar-digital-twin
+    component: config
+data:
+  # Kafka broker address used by data-generator and algorithm-processor.
+  KAFKA_BROKER: "kafka-clusterip:9092"
+  # Topic carrying raw meter readings.
+  KAFKA_METER_READINGS_TOPIC: "meter-readings"
+  # TimescaleDB connection info used by backend services.
+  TIMESCALE_HOST: "timescaledb"
+  TIMESCALE_PORT: "5432"
+  TIMESCALE_DB: "kalmar_digital_twin"
+  # REST API port (container listens on this).
+  REST_API_PORT: "8080"
+  # REST API CORS allowlist (comma-separated).
+  REST_API_CORS_ORIGINS: "http://194.47.171.153,https://194.47.171.153"
+  # UI port (container listens on this).
+  UI_PORT: "80"

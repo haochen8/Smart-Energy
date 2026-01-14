@@ -57,15 +57,6 @@ We deploy to a k3s cluster running on OpenStack Cumulus. Typical flow for shippi
 - OpenAPI JSON: `/openapi.json`
 - Health: `/health`
 
-## Repos and Paths
-
-- Root: `/Users/Hao/Desktop/Digital Twin/`
-- Data Generator: `/Users/Hao/Desktop/Digital Twin/data-generator/`
-- Algorithm Processor: `/Users/Hao/Desktop/Digital Twin/algorithm-processor/`
-- REST API: `/Users/Hao/Desktop/Digital Twin/rest-api/`
-- Infra: `/Users/Hao/Desktop/Digital Twin/infrastructure-k8s/`
-- Visualization: `/Users/Hao/Desktop/Digital Twin/visualization/`
-
 ## Notes
 
 - The dataset is trimmed to a 1-year window in the generator.

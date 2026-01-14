@@ -1,0 +1,49 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: prometheus
+  namespace: kalmar-digital-twin
+  labels:
+    app: prometheus
+    component: monitoring
+    project: kalmar-digital-twin
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: prometheus
+      component: monitoring
+  template:
+    metadata:
+      labels:
+        app: prometheus
+        component: monitoring
+        project: kalmar-digital-twin
+    spec:
+      containers:
+        - name: prometheus
+          image: prom/prometheus:latest # TODO: pin version and mount a ConfigMap for prometheus.yml.
+          args:
+            - "--config.file=/etc/prometheus/prometheus.yml" # TODO: supply config via ConfigMap.
+          ports:
+            - containerPort: 9090
+              name: http
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: prometheus
+  namespace: kalmar-digital-twin
+  labels:
+    app: prometheus
+    component: monitoring
+    project: kalmar-digital-twin
+spec:
+  type: ClusterIP
+  selector:
+    app: prometheus
+    component: monitoring
+  ports:
+    - name: http
+      port: 9090
+      targetPort: 9090

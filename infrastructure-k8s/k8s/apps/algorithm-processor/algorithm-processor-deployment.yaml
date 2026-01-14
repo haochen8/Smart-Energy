@@ -1,0 +1,91 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: algorithm-processor
+  namespace: kalmar-digital-twin
+  labels:
+    app: algorithm-processor
+    tier: backend
+    project: kalmar-digital-twin
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: algorithm-processor
+      tier: backend
+  template:
+    metadata:
+      labels:
+        app: algorithm-processor
+        tier: backend
+        project: kalmar-digital-twin
+    spec:
+      containers:
+        - name: algorithm-processor
+          image: "haochen98/algorithm-processor:latest@sha256:27bfaa0957e355bd2be987a157fed902af39f878e619b2440aefab44c4d24873"
+          imagePullPolicy: Always
+          ports:
+            - containerPort: 8080
+              name: http
+          env:
+            - name: KAFKA_BROKERS
+              valueFrom:
+                configMapKeyRef:
+                  name: kalmar-app-config
+                  key: KAFKA_BROKER
+            - name: ENERGY_TOPIC
+              valueFrom:
+                configMapKeyRef:
+                  name: kalmar-app-config
+                  key: KAFKA_METER_READINGS_TOPIC
+            - name: PROCESSED_TOPIC
+              value: "energy-processed"
+            - name: CONSUMER_GROUP
+              value: "algorithm-processor"
+            - name: ENABLE_STREAM_CONSUMER
+              value: "true"
+            - name: MAX_MESSAGES_PER_SECOND
+              value: "200"
+            - name: TIMESCALE_ENABLED
+              value: "true"
+            - name: TIMESCALE_HOST
+              valueFrom:
+                configMapKeyRef:
+                  name: kalmar-app-config
+                  key: TIMESCALE_HOST
+            - name: TIMESCALE_PORT
+              valueFrom:
+                configMapKeyRef:
+                  name: kalmar-app-config
+                  key: TIMESCALE_PORT
+            - name: TIMESCALE_DB
+              valueFrom:
+                configMapKeyRef:
+                  name: kalmar-app-config
+                  key: TIMESCALE_DB
+            - name: TIMESCALE_USER
+              valueFrom:
+                secretKeyRef:
+                  name: timescaledb-secret
+                  key: POSTGRES_USER
+            - name: TIMESCALE_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: timescaledb-secret
+                  key: POSTGRES_PASSWORD
+            - name: TIMESCALE_ENABLE_RETENTION
+              value: "true"
+            - name: TIMESCALE_RETENTION_DAYS
+              value: "365"
+            - name: FLASK_PORT
+              valueFrom:
+                configMapKeyRef:
+                  name: kalmar-app-config
+                  key: REST_API_PORT
+          resources:
+            requests:
+              cpu: 100m
+              memory: 256Mi
+            limits:
+              cpu: 500m
+              memory: 512Mi

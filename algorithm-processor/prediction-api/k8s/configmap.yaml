@@ -1,0 +1,32 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: prediction-api-config
+  namespace: prediction-api
+data:
+  # Redis Configuration
+  REDIS_HOST: "redis-service"
+  REDIS_PORT: "6379"
+  REDIS_DB: "0"
+  
+  # Model Configuration
+  MODEL_PATH: "/app/models/timeseries_model.pkl"
+  LOOKBACK_WINDOW: "20"
+  DATA_PATH: "/app/data"
+  
+  # API Configuration
+  MAX_DATA_POINTS_PER_REQUEST: "1000"
+  MAX_SERIES_PER_INSTANCE: "100"
+  
+  # Gunicorn Configuration
+  GUNICORN_WORKERS: "4"
+  GUNICORN_TIMEOUT: "120"
+  GUNICORN_MAX_REQUESTS: "1000"
+  GUNICORN_MAX_REQUESTS_JITTER: "100"
+  
+  # Flask Configuration
+  FLASK_ENV: "production"
+  FLASK_DEBUG: "false"
+  FLASK_HOST: "0.0.0.0"
+  FLASK_PORT: "5001"
+  LOG_LEVEL: "INFO"

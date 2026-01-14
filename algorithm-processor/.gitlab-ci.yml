@@ -1,0 +1,17 @@
+image: node:20
+
+stages:
+  - ci
+
+ci:
+  stage: ci
+  script:
+    - cd prediction-api
+    - |
+      if [ -f package-lock.json ]; then
+        npm ci
+      else
+        npm install
+      fi
+    - npm test
+    - npm run build

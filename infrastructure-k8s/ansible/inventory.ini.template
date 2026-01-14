@@ -1,0 +1,13 @@
+[k3s_server]
+# Replace with the floating_ip output from Terraform (control-plane public entry point)
+<control-plane-floating-ip> ansible_user=ubuntu ansible_ssh_private_key_file=/path/to/smart-energy-keypair.pem
+
+[k3s_agents]
+# Replace with worker private IPs (or floating IPs if you allocate them)
+<worker-private-or-floating-ip-1> ansible_user=ubuntu ansible_ssh_private_key_file=/path/to/smart-energy-keypair.pem
+<worker-private-or-floating-ip-2> ansible_user=ubuntu ansible_ssh_private_key_file=/path/to/smart-energy-keypair.pem
+
+[all:vars]
+# Uncomment to tunnel to private worker IPs through the control-plane public IP
+# ansible_ssh_common_args='-o ProxyCommand="ssh -i /path/to/smart-energy-keypair.pem -W %h:%p ubuntu@<control-plane-floating-ip>" -o StrictHostKeyChecking=no'
+ansible_ssh_common_args='-o StrictHostKeyChecking=no'

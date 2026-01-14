@@ -1,0 +1,8 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: kalmar-digital-twin
+  labels:
+    project: kalmar-digital-twin
+    environment: dev
+# All digital twin components live in this namespace.

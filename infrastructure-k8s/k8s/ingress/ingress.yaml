@@ -1,0 +1,30 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: kalmar-digital-twin-ingress
+  namespace: kalmar-digital-twin
+  labels:
+    project: kalmar-digital-twin
+  annotations:
+    nginx.ingress.kubernetes.io/rewrite-target: /$2 # TODO: adjust per ingress controller.
+    # TODO: add/remove annotations for TLS, rate limits, CORS as needed.
+spec:
+  ingressClassName: nginx # TODO: set to your ingress class.
+  rules:
+    - host: kalmar-twin.local # TODO: set host for your environment.
+      http:
+        paths:
+          - path: /api(/|$)(.*)
+            pathType: Prefix
+            backend:
+              service:
+                name: rest-api
+                port:
+                  number: 80
+          - path: /dashboard(/|$)(.*)
+            pathType: Prefix
+            backend:
+              service:
+                name: visualization-ui
+                port:
+                  number: 80

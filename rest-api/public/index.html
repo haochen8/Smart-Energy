@@ -1,0 +1,158 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Kalmar Energy Control Room</title>
+    <link rel="stylesheet" href="/ui/styles.css" />
+  </head>
+  <body>
+    <div class="background">
+      <div class="orb orb-one"></div>
+      <div class="orb orb-two"></div>
+      <div class="grid"></div>
+    </div>
+
+    <header class="hero">
+      <div>
+        <p class="tag">Digital Twin Live View</p>
+        <h1>Kalmar Energy Control Room</h1>
+        <p class="subtitle">Real-time visibility into meters, spot prices, and DSM recommendations.</p>
+      </div>
+      <div class="status">
+        <div class="status-item">
+          <span class="label">API status</span>
+          <span id="apiStatus" class="value">Checking...</span>
+        </div>
+        <div class="status-item">
+          <span class="label">Last updated</span>
+          <span id="lastUpdated" class="value">-</span>
+        </div>
+      </div>
+    </header>
+
+    <section class="controls">
+      <div class="control-block">
+        <label for="apiKey">API key</label>
+        <input id="apiKey" type="password" placeholder="Enter X-API-Key" />
+      </div>
+      <div class="control-block">
+        <label for="areaInput">Area</label>
+        <select id="areaInput">
+          <option value="">Select area</option>
+        </select>
+      </div>
+      <div class="control-block">
+        <label for="seriesSelect">Series</label>
+        <select id="seriesSelect">
+          <option value="">Select series_id</option>
+        </select>
+      </div>
+      <div class="control-actions">
+        <button id="loadArea" class="btn btn-secondary">Load area</button>
+        <button id="refresh" class="btn btn-primary">Refresh</button>
+        <button id="toggleAuto" class="btn btn-ghost">Auto: off</button>
+        <a class="btn btn-outline" href="/ui/logout">Sign out</a>
+      </div>
+    </section>
+
+    <section class="highlight">
+      <div class="highlight-card">
+        <p class="label">Latest timestamp</p>
+        <h2 id="latestTimestamp">-</h2>
+        <p class="hint">Most recent hourly reading returned by the API.</p>
+      </div>
+      <div class="highlight-card">
+        <p class="label">Connection</p>
+        <div class="connection">
+          <span id="connectionIndicator" class="dot"></span>
+          <span id="connectionText">Waiting for data</span>
+        </div>
+        <p class="hint">Auto refresh checks every 60 seconds.</p>
+      </div>
+      <div class="highlight-card">
+        <p class="label">Stream status</p>
+        <h2 id="streamTimestamp">-</h2>
+        <p class="meta">Rows ingested: <span id="streamCount">-</span></p>
+        <p class="hint">Latest timestamp across all meters.</p>
+      </div>
+      <div class="highlight-card">
+        <p class="label">Swagger UI</p>
+        <a class="btn btn-outline" href="/docs" target="_blank" rel="noreferrer">Open Swagger</a>
+        <p class="hint">Use the same API key for the docs.</p>
+      </div>
+      <div class="highlight-card">
+        <p class="label">Grafana</p>
+        <a class="btn btn-outline" href="http://194.47.171.153:32000" target="_blank" rel="noreferrer">Open Grafana</a>
+        <p class="hint">Operational dashboards for cluster and API metrics.</p>
+      </div>
+    </section>
+
+    <section class="cards">
+      <article class="card">
+        <h3>Consumption (latest hour)</h3>
+        <p id="consumptionValue" class="metric">-</p>
+        <p class="meta">kWh</p>
+      </article>
+      <article class="card">
+        <h3>Production (latest hour)</h3>
+        <p id="productionValue" class="metric">-</p>
+        <p class="meta">kWh</p>
+      </article>
+      <article class="card">
+        <h3>Spot price (latest hour)</h3>
+        <p id="spotPriceValue" class="metric">-</p>
+        <p class="meta">SEK</p>
+      </article>
+      <article class="card dsm">
+        <div class="dsm-header">
+          <h3>DSM output</h3>
+          <span id="decisionBadge" class="badge">-</span>
+        </div>
+        <p id="decisionReason" class="dsm-reason">Awaiting decision data.</p>
+        <div class="dsm-grid">
+          <div>
+            <p class="label">Confidence</p>
+            <p id="decisionConfidence" class="value">-</p>
+          </div>
+          <div>
+            <p class="label">Predicted peak time</p>
+            <p id="decisionPeak" class="value">-</p>
+          </div>
+          <div>
+            <p class="label">Estimated savings</p>
+            <p id="decisionSavings" class="value">-</p>
+          </div>
+        </div>
+      </article>
+    </section>
+
+    <section class="charts">
+      <div class="chart-card">
+        <div class="chart-header">
+          <h3>Spot price (24h)</h3>
+          <span id="spotSeriesLabel" class="meta">-</span>
+        </div>
+        <canvas id="spotChart" height="180"></canvas>
+        <div class="chart-tooltip" data-chart="spotChart"></div>
+      </div>
+      <div class="chart-card">
+        <div class="chart-header">
+          <h3>Consumption vs production (24h)</h3>
+          <span id="energySeriesLabel" class="meta">-</span>
+        </div>
+        <canvas id="energyChart" height="180"></canvas>
+        <div class="chart-tooltip" data-chart="energyChart"></div>
+      </div>
+    </section>
+
+    <section class="swagger-embed">
+      <details>
+        <summary>Inline Swagger docs</summary>
+        <iframe title="Swagger UI" src="/docs" loading="lazy"></iframe>
+      </details>
+    </section>
+
+    <script src="/ui/app.js"></script>
+  </body>
+</html>

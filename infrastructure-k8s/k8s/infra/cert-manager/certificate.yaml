@@ -1,0 +1,12 @@
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: rest-api-cert
+  namespace: kalmar-digital-twin
+spec:
+  secretName: digital-twin-tls
+  issuerRef:
+    name: letsencrypt-http
+    kind: ClusterIssuer
+  dnsNames:
+    - api.digital-twin.194.47.171.153.sslip.io

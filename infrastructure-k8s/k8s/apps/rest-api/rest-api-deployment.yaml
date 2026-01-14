@@ -1,0 +1,114 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: rest-api
+  namespace: kalmar-digital-twin
+  labels:
+    app: rest-api
+    tier: backend
+    project: kalmar-digital-twin
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: rest-api
+      tier: backend
+  template:
+    metadata:
+      labels:
+        app: rest-api
+        tier: backend
+        project: kalmar-digital-twin
+    spec:
+      containers:
+        - name: rest-api
+          image: "haochen98/rest-api:latest@sha256:5d9ec3aa1d2adf01e9d32048c3bb98ff9bf3ca4a03230362c004ffc96422289b"
+          imagePullPolicy: Always
+          ports:
+            - containerPort: 8080
+              name: http
+          resources:
+            requests:
+              cpu: "100m"
+              memory: "128Mi"
+            limits:
+              cpu: "500m"
+              memory: "512Mi"
+          readinessProbe:
+            httpGet:
+              path: /health
+              port: http
+            initialDelaySeconds: 5
+            periodSeconds: 10
+            timeoutSeconds: 3
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: http
+            initialDelaySeconds: 10
+            periodSeconds: 20
+            timeoutSeconds: 3
+          env:
+            - name: PORT
+              valueFrom:
+                configMapKeyRef:
+                  name: kalmar-app-config
+                  key: REST_API_PORT
+            - name: TIMESCALE_ENABLED
+              value: "true"
+            - name: TIMESCALE_HOST
+              valueFrom:
+                configMapKeyRef:
+                  name: kalmar-app-config
+                  key: TIMESCALE_HOST
+            - name: TIMESCALE_PORT
+              valueFrom:
+                configMapKeyRef:
+                  name: kalmar-app-config
+                  key: TIMESCALE_PORT
+            - name: TIMESCALE_DB
+              valueFrom:
+                secretKeyRef:
+                  name: timescaledb-secret
+                  key: POSTGRES_DB
+            - name: TIMESCALE_USER
+              valueFrom:
+                secretKeyRef:
+                  name: timescaledb-secret
+                  key: POSTGRES_USER
+            - name: TIMESCALE_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: timescaledb-secret
+                  key: POSTGRES_PASSWORD
+            - name: TIMESCALE_SSL
+              value: "false"
+            - name: API_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: rest-api-secret
+                  key: API_KEY
+            - name: UI_JWT_SECRET
+              valueFrom:
+                secretKeyRef:
+                  name: rest-api-secret
+                  key: UI_JWT_SECRET
+            - name: UI_AUTH_USERNAME
+              valueFrom:
+                secretKeyRef:
+                  name: rest-api-secret
+                  key: UI_AUTH_USERNAME
+            - name: UI_AUTH_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: rest-api-secret
+                  key: UI_AUTH_PASSWORD
+            - name: CORS_ORIGINS
+              valueFrom:
+                configMapKeyRef:
+                  name: kalmar-app-config
+                  key: REST_API_CORS_ORIGINS
+            - name: ALGORITHM_PROCESSOR_BASE_URL
+              value: "http://algorithm-processor:8080"
+            - name: ALGORITHM_PROCESSOR_TIMEOUT_MS
+              value: "10000"

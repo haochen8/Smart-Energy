@@ -1,0 +1,18 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: timescaledb
+  namespace: kalmar-digital-twin
+  labels:
+    app: timescaledb
+    component: database
+    project: kalmar-digital-twin
+spec:
+  type: ClusterIP
+  selector:
+    app: timescaledb
+    component: database
+  ports:
+    - name: postgres
+      port: 5432
+      targetPort: 5432

@@ -1,0 +1,39 @@
+image: node:20
+
+stages:
+  - ci
+  - loadtest
+
+ci:
+  stage: ci
+  script:
+    - npm ci
+    - |
+      if ls test/**/*.test.ts >/dev/null 2>&1; then
+        npm test
+      else
+        echo "No tests found, skipping."
+      fi
+    - npm run build
+
+k6:
+  image:
+    name: grafana/k6:0.51.0
+    entrypoint: [""]
+  stage: loadtest
+  needs:
+    - ci
+  variables:
+    BASE_URL: $K6_BASE_URL
+    API_KEY: $K6_API_KEY
+    AREA: $K6_AREA
+    SERIES_ID: $K6_SERIES_ID
+    INSECURE: $K6_INSECURE
+  script:
+    - k6 run k6/smoke.js
+    - k6 run k6/state-latest.js
+    - k6 run k6/area-latest.js
+    - k6 run k6/predict.js
+    - k6 run k6/spot-price.js
+  rules:
+    - if: '$K6_BASE_URL && $K6_API_KEY'

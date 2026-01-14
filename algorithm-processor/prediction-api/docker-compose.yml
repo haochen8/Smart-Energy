@@ -1,0 +1,78 @@
+services:
+  # Fast cache and primary storage for demo
+  redis:
+    image: redis:7-alpine
+    container_name: timeseries-redis
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    command: redis-server --appendonly yes --save 60 1000 --maxmemory-policy noeviction
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 30s
+      timeout: 3s
+      retries: 3
+
+  # Main prediction API service
+  api:
+    build: .
+    container_name: timeseries-api
+    ports:
+      - "5001:5001"
+    environment:
+      - REDIS_HOST=redis
+      - REDIS_PORT=6379
+      - MODEL_PATH=/app/models/timeseries_model.json
+      - DATA_PATH=/app/data
+      - LOOKBACK_WINDOW=20
+      - ENABLE_STREAM_CONSUMER=false
+    volumes:
+      - model_artifacts:/app/models      # Shared model storage only
+    depends_on:
+      redis:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:5001/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  # Retrainer service for model updates
+  retrainer:
+    build: .
+    container_name: timeseries-retrainer
+    environment:
+      - REDIS_HOST=redis
+      - REDIS_PORT=6379
+      - MODEL_PATH=/app/models/timeseries_model.json
+      - DATA_PATH=/app/data
+    volumes:
+      - model_artifacts:/app/models      # Shared model storage only
+    depends_on:
+      redis:
+        condition: service_healthy
+    command: ["echo", "Retrainer service ready. Use 'docker-compose run --rm retrainer node dist/retrain.js'"]
+    profiles:
+      - tools  # Only start when explicitly requested
+
+  # Data ingestion service (optional - for continuous data flow)
+  data-ingester:
+    build: .
+    container_name: timeseries-ingester
+    environment:
+      - REDIS_HOST=redis
+      - REDIS_PORT=6379
+      - DATA_PATH=/app/data
+    volumes:
+      - model_artifacts:/app/models      # For model access only
+    depends_on:
+      redis:
+        condition: service_healthy
+    command: ["node", "dist/dataIngester.js"]
+    profiles:
+      - ingestion  # Only start when explicitly requested
+
+volumes:
+  redis_data:          # Redis persistence (primary storage)
+  model_artifacts:     # Trained models (.pkl, .h5 files)

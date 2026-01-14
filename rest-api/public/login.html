@@ -1,0 +1,52 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Kalmar Energy Control Room | Access</title>
+    <link rel="stylesheet" href="/ui/login.css" />
+  </head>
+  <body>
+    <div class="background">
+      <div class="orb orb-one"></div>
+      <div class="orb orb-two"></div>
+      <div class="grid"></div>
+    </div>
+
+    <main class="login">
+      <section class="brand">
+        <p class="tag">Digital Twin Access</p>
+        <h1>Kalmar Energy Control Room</h1>
+        <p class="subtitle">Enter a valid JWT to unlock the live operational dashboard.</p>
+      </section>
+
+      <section class="card">
+        <h2>Admin sign-in</h2>
+        <p class="hint">Use the admin credentials to access the control room.</p>
+        <form id="loginForm">
+          <label for="usernameInput">Username</label>
+          <input id="usernameInput" type="text" placeholder="admin" autocomplete="username" required />
+          <label for="passwordInput">Password</label>
+          <input
+            id="passwordInput"
+            type="password"
+            placeholder="Enter password"
+            autocomplete="current-password"
+            required
+          />
+          <div class="actions">
+            <button type="submit" class="btn btn-primary">Unlock UI</button>
+            <button type="button" id="clearBtn" class="btn btn-ghost">Clear</button>
+          </div>
+        </form>
+        <p id="status" class="status">Awaiting credentials.</p>
+      </section>
+
+      <section class="tips">
+        <p>Need access? Contact the platform owner for admin credentials.</p>
+      </section>
+    </main>
+
+    <script src="/ui/login.js"></script>
+  </body>
+</html>

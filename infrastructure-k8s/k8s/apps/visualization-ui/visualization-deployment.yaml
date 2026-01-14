@@ -1,0 +1,31 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: visualization-ui
+  namespace: kalmar-digital-twin
+  labels:
+    app: visualization-ui
+    tier: frontend
+    project: kalmar-digital-twin
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: visualization-ui
+      tier: frontend
+  template:
+    metadata:
+      labels:
+        app: visualization-ui
+        tier: frontend
+        project: kalmar-digital-twin
+    spec:
+      containers:
+        - name: visualization-ui
+          image: "<TO_BE_FILLED_VISUALIZATION_UI_IMAGE>" # TODO: provide built image from visualization UI repo.
+          ports:
+            - containerPort: 80
+              name: http
+          env:
+            - name: API_BASE_URL
+              value: "/api" # Ingress routes /api to the REST API service.

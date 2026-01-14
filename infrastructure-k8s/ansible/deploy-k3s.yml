@@ -1,0 +1,88 @@
+---
+# ----------------------------------------------------------------------
+# Smart Energy Project – k3s Deployment Playbook
+# Deploys a k3s control-plane + worker nodes on OpenStack VMs.
+# ----------------------------------------------------------------------
+
+- hosts: k3s_server
+  become: yes
+  gather_facts: no
+  vars:
+    ansible_python_interpreter: /usr/bin/python3
+
+  pre_tasks:
+    - name: Wait for SSH to be ready
+      wait_for_connection:
+        timeout: 300
+
+    - name: Gather facts once connection is up
+      setup:
+
+  tasks:
+    - name: Install k3s server (control-plane)
+      shell: |
+        curl -sfL https://get.k3s.io |
+        INSTALL_K3S_EXEC="server --write-kubeconfig-mode 644 --node-external-ip {{ ansible_host }} --tls-san {{ ansible_host }}" \
+        sh -
+      args:
+        creates: /usr/local/bin/k3s
+
+    - name: Wait for k3s to be active
+      systemd:
+        name: k3s
+        state: started
+      register: k3s_service
+      until: k3s_service.status.ActiveState == "active"
+      retries: 20
+      delay: 5
+
+    - name: Extract k3s server token
+      command: cat /var/lib/rancher/k3s/server/node-token
+      register: k3s_token_raw
+
+    - name: Set token fact
+      set_fact:
+        k3s_token: "{{ k3s_token_raw.stdout }}"
+
+    - name: Copy kubeconfig for local access
+      copy:
+        src: /etc/rancher/k3s/k3s.yaml
+        dest: /home/ubuntu/kubeconfig.yaml
+        owner: ubuntu
+        group: ubuntu
+        mode: 0644
+        remote_src: yes
+
+- hosts: k3s_agents
+  become: yes
+  gather_facts: no
+  vars:
+    ansible_python_interpreter: /usr/bin/python3
+
+  pre_tasks:
+    - name: Wait for SSH on workers
+      wait_for_connection:
+        timeout: 300
+
+    - name: Gather worker facts
+      setup:
+
+  tasks:
+    - name: Install k3s agent
+      shell: |
+        curl -sfL https://get.k3s.io |
+        INSTALL_K3S_EXEC="agent --server https://{{ hostvars[groups['k3s_server'][0]].ansible_host }}:6443 \
+        --token {{ hostvars[groups['k3s_server'][0]].k3s_token }} \
+        --node-external-ip {{ ansible_host }}" \
+        sh -
+      args:
+        creates: /usr/local/bin/k3s-agent
+
+    - name: Wait for k3s-agent service to be running
+      systemd:
+        name: k3s-agent
+        state: started
+      register: k3s_agent_service
+      until: k3s_agent_service.status.ActiveState == "active"
+      retries: 20
+      delay: 5

@@ -1,0 +1,24 @@
+apiVersion: keda.sh/v1alpha1
+kind: ScaledObject
+metadata:
+  name: algorithm-processor-kafka
+  namespace: kalmar-digital-twin
+  labels:
+    app: algorithm-processor
+    project: kalmar-digital-twin
+spec:
+  scaleTargetRef:
+    name: algorithm-processor
+  pollingInterval: 15
+  cooldownPeriod: 60
+  minReplicaCount: 1
+  maxReplicaCount: 5
+  triggers:
+    - type: kafka
+      metadata:
+        bootstrapServers: kafka-clusterip.kalmar-digital-twin.svc.cluster.local:9092
+        consumerGroup: algorithm-processor
+        topic: meter-readings
+        lagThreshold: "1000"
+        activationLagThreshold: "100"
+        offsetResetPolicy: latest

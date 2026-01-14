@@ -1,0 +1,32 @@
+# Docker Desktop Kubernetes - Simple NodePort Service
+apiVersion: v1
+kind: Service
+metadata:
+  name: prediction-api-nodeport
+  namespace: prediction-api
+  labels:
+    app: prediction-api
+spec:
+  type: NodePort
+  selector:
+    app: prediction-api
+  ports:
+  - port: 80
+    targetPort: 5001
+    nodePort: 30080  # Access via localhost:30080
+---
+# Alternative: LoadBalancer for Docker Desktop
+apiVersion: v1
+kind: Service
+metadata:
+  name: prediction-api-loadbalancer
+  namespace: prediction-api
+  labels:
+    app: prediction-api
+spec:
+  type: LoadBalancer
+  selector:
+    app: prediction-api
+  ports:
+  - port: 80
+    targetPort: 5001

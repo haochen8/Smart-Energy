@@ -1,0 +1,67 @@
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: data-generator-batch
+  namespace: kalmar-digital-twin
+  labels:
+    app: data-generator
+    tier: backend
+    project: kalmar-digital-twin
+spec:
+  schedule: "0 * * * *" # Every hour.
+  jobTemplate:
+    spec:
+      template:
+        metadata:
+          labels:
+            app: data-generator
+            tier: backend
+            project: kalmar-digital-twin
+        spec:
+          nodeSelector:
+            node-role: worker
+          affinity:
+            podAntiAffinity:
+              preferredDuringSchedulingIgnoredDuringExecution:
+                - weight: 50
+                  podAffinityTerm:
+                    labelSelector:
+                      matchLabels:
+                        app: kafka
+                    topologyKey: kubernetes.io/hostname
+          restartPolicy: OnFailure
+          containers:
+            - name: data-generator
+              image: "haochen98/data-generator:latest@sha256:34e2a4708449c741ad118ff400f2f0267718a1fbc5bfa5d8412c51e486899472"
+              imagePullPolicy: IfNotPresent
+              resources:
+                requests:
+                  cpu: 100m
+                  memory: 512Mi
+                limits:
+                  cpu: 500m
+                  memory: 1Gi
+              command:
+                - "pnpm"
+                - "start:batch"
+              env:
+                - name: KAFKA_BROKERS
+                  value: "kafka-clusterip:9092"
+                - name: KAFKA_TOPIC
+                  value: "meter-readings"
+                - name: DATASET_PATH
+                  value: "/app/dataset/final_df.csv"
+                - name: DATASET_START
+                  value: "2020-01-01 00:00:00"
+                - name: DATASET_END
+                  value: "2020-12-31 23:00:00"
+                - name: METER_COUNT
+                  value: "5"
+                - name: NODE_OPTIONS
+                  value: "--max-old-space-size=768"
+                - name: REDIS_HOST
+                  value: "redis"
+                - name: REDIS_PORT
+                  value: "6379"
+                - name: REDIS_DB
+                  value: "0"

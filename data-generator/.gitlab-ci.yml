@@ -1,0 +1,15 @@
+image: node:20
+
+stages:
+  - ci
+
+ci:
+  stage: ci
+  script:
+    - |
+      if [ -f package-lock.json ]; then
+        npm ci
+      else
+        npm install
+      fi
+    - npm run build
